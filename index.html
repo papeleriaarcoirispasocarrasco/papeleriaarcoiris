@@ -281,6 +281,12 @@
                 <p>📧 <a href="mailto:papeleria.arcoirispasocarrasco@gmail.com" style="color: #38bdf8;">papeleria.arcoirispasocarrasco@gmail.com</a></p>
             </div>
 
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a href="https://www.instagram.com/papearco?igsh=MWV6YW0wa2hxOXh0NA==" target="_blank" class="social-btn btn-ig">Instagram</a>
+                <a href="https://www.facebook.com/share/1BVVGQhF1R/" target="_blank" class="social-btn btn-fb">Facebook</a>
+                <a href="https://www.tiktok.com/@papeleria.arcoris?_r=1&_t=ZS-98T35FaSUtB" target="_blank" class="social-btn btn-tk">TikTok</a>
+            </div>
+
             <div class="footer-copy">
                 © 2026 Papelería Arcoiris. Todos los derechos reservados.
             </div>
@@ -532,21 +538,30 @@
 
                     let contador = 0;
                     jsonRows.forEach((row, idx) => {
-                        if (row.length >= 2 && idx > 0) {
-                            let nombreArt = row[1] || row[0];
-                            let nuevoId = catalogo.length > 0 ? Math.max(...catalogo.map(p => p.id)) + 1 : 1;
-                            catalogo.push({
-                                id: nuevoId,
-                                categoria: "Papelería",
-                                subcategoria: "General",
-                                detalle: String(nombreArt),
-                                nombre: String(nombreArt),
-                                precioContado: 150,
-                                imagen: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300"
-                            });
-                            contador++;
+                        if (idx > 0 && row && row.length > 0) {
+                            let nombreArt = row[0] ? String(row[0]).trim() : "";
+                            let precioArt = row[1] ? parseFloat(row[1]) : 150;
+
+                            if (nombreArt) {
+                                let nuevoId = catalogo.length > 0 ? Math.max(...catalogo.map(p => p.id)) + 1 : 1;
+                                catalogo.push({
+                                    id: nuevoId,
+                                    categoria: "Papelería",
+                                    subcategoria: "General",
+                                    detalle: nombreArt,
+                                    nombre: nombreArt,
+                                    precioContado: isNaN(precioArt) ? 150 : precioArt,
+                                    imagen: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300"
+                                });
+                                contador++;
+                            }
                         }
                     });
+
+                    if (contador === 0) {
+                        alert("No se encontraron artículos válidos. Asegúrate de que los datos estén en la primera columna.");
+                        return;
+                    }
 
                     guardarCatalogoStorage();
                     actualizarBarraSubcategorias();
@@ -554,7 +569,8 @@
                     renderizarAdminPrecios();
                     alert(`¡Se importaron ${contador} artículos correctamente!`);
                 } catch (err) {
-                    alert("Error al leer el archivo Excel.");
+                    console.error(err);
+                    alert("Error al leer el archivo Excel. Verifica el formato.");
                 }
             };
             reader.readAsArrayBuffer(file);
